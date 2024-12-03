@@ -30,13 +30,16 @@ public class Server {
     private final Game game;
 
     private final Map<Request.Authorize, Player.HumanPlayer> known = Map.of(
-            new Request.Authorize("1234"),
-            new Player.HumanPlayer("Player 0")
+            new Request.Authorize("1234"), new Player.HumanPlayer("Player 0"),
+            new Request.Authorize("1234"), new Player.HumanPlayer("Player 1"),
+            new Request.Authorize("1345"), new Player.HumanPlayer("Player 2"),
+            new Request.Authorize("1678"), new Player.HumanPlayer("Player 3"),
+            new Request.Authorize("1679"), new Player.HumanPlayer("Player 4")
     );
 
     public Server(Game game) {
         this.game = game;
-        game.add(new Player.HumanPlayer("Player 0"), game::randomLocation);
+        known.forEach((authorize, player) -> game.add(player, game::randomLocation));
         game.render();
     }
 
