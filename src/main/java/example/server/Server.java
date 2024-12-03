@@ -14,6 +14,7 @@ import example.domain.Request;
 import example.domain.Response;
 import example.domain.game.Action;
 import example.domain.game.Direction;
+import example.domain.game.Item;
 import example.domain.game.Player;
 import example.game.Game;
 import org.slf4j.Logger;
@@ -42,6 +43,9 @@ public class Server {
     public Server(Game game) {
         this.game = game;
         known.forEach((authorize, player) -> game.add(player, game::randomLocation));
+        for(int i = 0; i < 17; i++) {
+            game.add(new Item.Gold(i, ThreadLocalRandom.current().nextInt(100)), game::randomLocation);
+        }
         game.render();
     }
 
