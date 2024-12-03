@@ -3,9 +3,9 @@ package example.domain.game;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class SimpleCave implements Cave {
-    private final int columns;
-    private final int rows;
-    private final boolean[] rocks;
+    public final int columns;
+    public final int rows;
+    public final boolean[] rocks;
 
     private SimpleCave() {
         this.columns = 0;
