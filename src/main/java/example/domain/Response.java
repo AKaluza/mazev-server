@@ -23,9 +23,10 @@ public sealed interface Response {
     record StateCave(Cave cave) implements Response {
     }
 
-    record StateLocations(Collection<ItemLocation> itemLocations, Collection<PlayerLocation> playerLocations) implements Response {
+    record StateLocations(Collection<ItemLocation> itemLocations, Collection<PlayerLocation> playerLocations, Integer health, Integer gold) implements Response {
         public record ItemLocation(Item entity, Location location) {
         }
+
         public record PlayerLocation(Player entity, Location location) {
         }
     }

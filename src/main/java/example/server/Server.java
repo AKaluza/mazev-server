@@ -24,7 +24,7 @@ public class Server {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final AtomicReference<Response.StateLocations> state = new AtomicReference<>(new Response.StateLocations(List.of(), List.of()));
+    private final AtomicReference<State> state = new AtomicReference<>(new State(List.of(), List.of(), Map.of(), Map.of()));
     private final BlockingQueue<Action> actionsQueue = new LinkedBlockingQueue<>();
     private final Lock stateLock = new ReentrantLock();
     private final Condition stateUpdated = stateLock.newCondition();
@@ -112,7 +112,7 @@ public class Server {
             }
 
             Thread t1 = Thread.startVirtualThread(() -> handleClientCommands(reader, player));
-            Thread t2 = Thread.startVirtualThread(() -> handleClientState(writer));
+            Thread t2 = Thread.startVirtualThread(() -> handleClientState(writer, player));
             t1.join();
             t2.join();
         } catch (IOException e) {
@@ -138,10 +138,11 @@ public class Server {
 
                 final var itemLocations = game.items().entrySet().stream().map(entry -> new Response.StateLocations.ItemLocation(entry.getKey(), entry.getValue())).toList();
                 final var playerLocations = game.players().entrySet().stream().map(entry -> new Response.StateLocations.PlayerLocation(entry.getKey(), entry.getValue())).toList();
+
                 // Update the state
                 stateLock.lock();
                 try {
-                    state.set(new Response.StateLocations(itemLocations, playerLocations));
+                    state.set(new State(itemLocations, playerLocations, game.healths(), game.golds()));
                     logger.info("Items updated to {}", itemLocations);
                     logger.info("Players updated to {}", playerLocations);
                     // Notify client state threads
@@ -176,7 +177,7 @@ public class Server {
         }
     }
 
-    private void handleClientState(BufferedWriter writer) {
+    private void handleClientState(BufferedWriter writer, Player.HumanPlayer player) {
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 stateLock.lock();
@@ -184,7 +185,11 @@ public class Server {
                     stateUpdated.await();
                     // Send the new state to the client
                     final var currentState = state.get();
-                    final var stateJson = objectMapper.writeValueAsString(currentState);
+                    final var playerState = new Response.StateLocations(currentState.itemLocations(),
+                            currentState.playerLocations(),
+                            currentState.playerHealths().getOrDefault(player, 0),
+                            currentState.playerGolds().getOrDefault(player, 0));
+                    final var stateJson = objectMapper.writeValueAsString(playerState);
                     writer.write(stateJson);
                     writer.newLine();
                     writer.flush();
@@ -196,5 +201,11 @@ public class Server {
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private record State(List<Response.StateLocations.ItemLocation> itemLocations,
+                         List<Response.StateLocations.PlayerLocation> playerLocations,
+                         Map<Player, Integer> playerHealths,
+                         Map<Player, Integer> playerGolds) {
     }
 }

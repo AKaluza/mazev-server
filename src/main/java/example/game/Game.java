@@ -14,6 +14,14 @@ public class Game {
     private final Map<Player, Integer> playerGold;
     private final Cave cave;
 
+    public Map<Player, Integer> healths() {
+        return Collections.unmodifiableMap(playerHealth);
+    }
+
+    public Map<Player, Integer> golds() {
+        return Collections.unmodifiableMap(playerGold);
+    }
+
     public Map<Player, Location> players() {
         return Collections.unmodifiableMap(players);
     }
