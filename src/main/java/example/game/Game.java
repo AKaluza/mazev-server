@@ -3,31 +3,34 @@ package example.game;
 import example.domain.game.*;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Game {
     private static final Random rg = new Random();
-    private final Map<Item, Location> items;
-    private final Map<Player, Location> players;
+    private static final int NUM_GOLD = 20;
+    private static final int NUM_HEALTH = 20;
+    private final Map<Item, Location> itemLocation;
+    private final Map<Player, Location> playerLocation;
     private final Map<Player, Integer> playerHealth;
     private final Map<Player, Integer> playerGold;
     private final Cave cave;
 
-    public Map<Player, Integer> healths() {
+    public Map<Player, Integer> playerHealth() {
         return Collections.unmodifiableMap(playerHealth);
     }
 
-    public Map<Player, Integer> golds() {
+    public Map<Player, Integer> playerGold() {
         return Collections.unmodifiableMap(playerGold);
     }
 
-    public Map<Player, Location> players() {
-        return Collections.unmodifiableMap(players);
+    public Map<Player, Location> playerLocation() {
+        return Collections.unmodifiableMap(playerLocation);
     }
 
-    public Map<Item, Location> items() {
-        return Collections.unmodifiableMap(items);
+    public Map<Item, Location> itemLocation() {
+        return Collections.unmodifiableMap(itemLocation);
     }
 
     public Cave cave() {
@@ -36,8 +39,8 @@ public class Game {
 
     public Game(Cave cave) {
         this.cave = cave;
-        this.players = new HashMap<>();
-        this.items = new HashMap<>();
+        this.playerLocation = new HashMap<>();
+        this.itemLocation = new HashMap<>();
         this.playerHealth = new HashMap<>();
         this.playerGold = new HashMap<>();
     }
@@ -54,7 +57,7 @@ public class Game {
             }
         }
 
-        for (final var entry : players.entrySet()) {
+        for (final var entry : playerLocation.entrySet()) {
             final var location = entry.getValue();
             tbl[location.row() * cave.columns() + location.column()] = switch (entry.getKey()) {
                 case Player.HumanPlayer ignored -> 'P';
@@ -62,7 +65,7 @@ public class Game {
             };
         }
 
-        for (final var entry : items.entrySet()) {
+        for (final var entry : itemLocation.entrySet()) {
             final var location = entry.getValue();
             tbl[location.row() * cave.columns() + location.column()] = switch (entry.getKey()) {
                 case Item.Gold ignored -> 'G';
@@ -82,15 +85,15 @@ public class Game {
         for (; ; ) {
             final var location = generateLocation.get();
 
-            if (items.containsValue(location)) {
+            if (itemLocation.containsValue(location)) {
                 continue;
             }
 
-            if (players.containsValue(location)) {
+            if (playerLocation.containsValue(location)) {
                 continue;
             }
 
-            items.put(entity, location);
+            itemLocation.put(entity, location);
 
             return;
         }
@@ -100,15 +103,15 @@ public class Game {
         for (; ; ) {
             final var location = generateLocation.get();
 
-            if (items.containsValue(location)) {
+            if (itemLocation.containsValue(location)) {
                 continue;
             }
 
-            if (players.containsValue(location)) {
+            if (playerLocation.containsValue(location)) {
                 continue;
             }
 
-            players.put(entity, location);
+            playerLocation.put(entity, location);
             if (entity instanceof Player.HumanPlayer player) {
                 playerHealth.put(player, 100);
                 playerGold.put(player, 0);
@@ -135,7 +138,7 @@ public class Game {
         final var filtered = commands.stream().collect(Collectors.groupingBy(Action::player)).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getFirst()));
 
         // apply commands to player locations
-        final var moved = players.entrySet().stream()
+        final var moved = playerLocation.entrySet().stream()
                 .map(entry -> {
                     final var action = filtered.get(entry.getKey());
                     if (action == null) {
@@ -155,7 +158,30 @@ public class Game {
         moved.forEach((key, value) -> fight(key, value.stream().map(Map.Entry::getKey).toList()));
 
         // update locations
-        moved.forEach((location, entries) -> entries.forEach(entry -> players.put(entry.getKey(), entry.getValue())));
+        moved.forEach((location, entries) -> entries.forEach(entry -> playerLocation.put(entry.getKey(), entry.getValue())));
+
+        // generate gold if none
+        if (itemLocation.keySet().stream().noneMatch(item -> item instanceof Item.Gold)) {
+            generateGold();
+        }
+
+        // generate health if none
+        if (itemLocation.keySet().stream().noneMatch(item -> item instanceof Item.Health)) {
+            generateHealth();
+        }
+
+    }
+
+    private void generateHealth() {
+        for (int i = 0; i < NUM_GOLD; i++) {
+            add(new Item.Gold(i, ThreadLocalRandom.current().nextInt(100)), this::randomLocation);
+        }
+    }
+
+    private void generateGold() {
+        for (int i = 0; i < NUM_HEALTH; i++) {
+            add(new Item.Health(i, ThreadLocalRandom.current().nextInt(100)), this::randomLocation);
+        }
     }
 
     private void fight(Location location, List<Player> players) {
@@ -173,10 +199,10 @@ public class Game {
         final var optionalMaximum = players.stream().max((o1, o2) -> Integer.compare(playerHealth.get(o1), playerHealth.get(o2)));
 
         optionalMaximum.ifPresent(maximum -> {
-            final var filtered = items.entrySet().stream().filter(entry -> entry.getValue().equals(location)).toList();
+            final var filtered = itemLocation.entrySet().stream().filter(entry -> entry.getValue().equals(location)).toList();
 
             // do something with non player entities, i.e. gold?
-            items.entrySet().stream()
+            itemLocation.entrySet().stream()
                     .filter(entry -> entry.getValue().equals(location))
                     .forEach(entry -> {
                         switch (entry.getKey()) {
@@ -190,7 +216,7 @@ public class Game {
                         }
                     });
 
-            filtered.forEach(entry -> items.remove(entry.getKey()));
+            filtered.forEach(entry -> itemLocation.remove(entry.getKey()));
         });
     }
 

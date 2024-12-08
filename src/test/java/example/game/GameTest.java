@@ -56,7 +56,7 @@ public class GameTest {
         final var expected = Map.of(player1, new Location(2, 1), player2, new Location(2, 1));
         game.step(actions);
 
-        Assertions.assertEquals(expected, game.players());
+        Assertions.assertEquals(expected, game.playerLocation());
         Assertions.assertEquals(50, game.health(player1));
         Assertions.assertEquals(50, game.health(player2));
     }
@@ -81,7 +81,7 @@ public class GameTest {
         game.step(actions);
         game.step(actions);
 
-        Assertions.assertEquals(expected, game.players());
+        Assertions.assertEquals(expected, game.playerLocation());
         Assertions.assertEquals(60, game.health(player1));
         Assertions.assertEquals(50, game.health(player2));
     }
@@ -99,7 +99,7 @@ public class GameTest {
         final var expected = Map.of(player1, new Location(2, 1));
         game.step(actions);
 
-        Assertions.assertEquals(expected, game.players());
+        Assertions.assertEquals(expected, game.playerLocation());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class GameTest {
         final var expected = Map.of(player1, new Location(2, 1));
         game.step(actions);
 
-        Assertions.assertEquals(expected, game.players());
+        Assertions.assertEquals(expected, game.playerLocation());
         Assertions.assertEquals(gold1.value(), game.gold(player1));
     }
 

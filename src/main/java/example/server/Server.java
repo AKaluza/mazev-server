@@ -14,7 +14,6 @@ import example.domain.Request;
 import example.domain.Response;
 import example.domain.game.Action;
 import example.domain.game.Direction;
-import example.domain.game.Item;
 import example.domain.game.Player;
 import example.game.Game;
 import org.slf4j.Logger;
@@ -43,9 +42,6 @@ public class Server {
     public Server(Game game) {
         this.game = game;
         known.forEach((authorize, player) -> game.add(player, game::randomLocation));
-        for(int i = 0; i < 17; i++) {
-            game.add(new Item.Gold(i, ThreadLocalRandom.current().nextInt(100)), game::randomLocation);
-        }
         game.render();
     }
 
@@ -136,13 +132,13 @@ public class Server {
 
                 game.step(actions);
 
-                final var itemLocations = game.items().entrySet().stream().map(entry -> new Response.StateLocations.ItemLocation(entry.getKey(), entry.getValue())).toList();
-                final var playerLocations = game.players().entrySet().stream().map(entry -> new Response.StateLocations.PlayerLocation(entry.getKey(), entry.getValue())).toList();
+                final var itemLocations = game.itemLocation().entrySet().stream().map(entry -> new Response.StateLocations.ItemLocation(entry.getKey(), entry.getValue())).toList();
+                final var playerLocations = game.playerLocation().entrySet().stream().map(entry -> new Response.StateLocations.PlayerLocation(entry.getKey(), entry.getValue())).toList();
 
                 // Update the state
                 stateLock.lock();
                 try {
-                    state.set(new State(itemLocations, playerLocations, game.healths(), game.golds()));
+                    state.set(new State(itemLocations, playerLocations, game.playerHealth(), game.playerGold()));
                     logger.info("Items updated to {}", itemLocations);
                     logger.info("Players updated to {}", playerLocations);
                     // Notify client state threads
