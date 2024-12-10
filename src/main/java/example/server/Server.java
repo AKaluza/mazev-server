@@ -30,15 +30,16 @@ public class Server {
     private final Game game;
 
     private final Map<Request.Authorize, Player.HumanPlayer> known = Map.of(
-            new Request.Authorize("2345"), new Player.HumanPlayer("Player 0'"),
-            new Request.Authorize("1234"), new Player.HumanPlayer("Player 0"),
-            new Request.Authorize("4231"), new Player.HumanPlayer("Player 1"),
-            new Request.Authorize("1345"), new Player.HumanPlayer("Player 2"),
-            new Request.Authorize("1678"), new Player.HumanPlayer("Player 3"),
-            new Request.Authorize("1679"), new Player.HumanPlayer("Player 4"),
-            new Request.Authorize("1670"), new Player.HumanPlayer("Player 5"),
-            new Request.Authorize("7564"), new Player.HumanPlayer("Player 6"),
-            new Request.Authorize("7890"), new Player.HumanPlayer("Player 7")
+            new Request.Authorize("2345"), new Player.HumanPlayer("Andrzej Kałuża"),
+            new Request.Authorize("1234"), new Player.HumanPlayer("Daniel Lewandowski"),
+            new Request.Authorize("4231"), new Player.HumanPlayer("Adrianna Ślusarczyk"),
+            new Request.Authorize("1345"), new Player.HumanPlayer("Anna Szpyt"),
+            new Request.Authorize("1678"), new Player.HumanPlayer("Bartek Fober"),
+            new Request.Authorize("1679"), new Player.HumanPlayer("Patryk Dziedzic"),
+            new Request.Authorize("1670"), new Player.HumanPlayer("Natalia Piękoś"),
+            new Request.Authorize("7564"), new Player.HumanPlayer("Filip Kiełbasiewicz"),
+            new Request.Authorize("7890"), new Player.HumanPlayer("Maciej Wawryniuk"),
+            new Request.Authorize("5748"), new Player.HumanPlayer("Natalia Kotrys")
     );
 
     public Server(Game game) {
