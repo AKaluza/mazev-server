@@ -174,13 +174,13 @@ public class Game {
 
     private void generateHealth() {
         for (int i = 0; i < NUM_GOLD; i++) {
-            add(new Item.Gold(i, ThreadLocalRandom.current().nextInt(100)), this::randomLocation);
+            add(new Item.Health(i, ThreadLocalRandom.current().nextInt(100)), this::randomLocation);
         }
     }
 
     private void generateGold() {
         for (int i = 0; i < NUM_HEALTH; i++) {
-            add(new Item.Health(i, ThreadLocalRandom.current().nextInt(100)), this::randomLocation);
+            add(new Item.Gold(i, ThreadLocalRandom.current().nextInt(100)), this::randomLocation);
         }
     }
 
