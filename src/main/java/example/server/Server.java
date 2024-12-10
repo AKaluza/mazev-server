@@ -36,7 +36,9 @@ public class Server {
             new Request.Authorize("1345"), new Player.HumanPlayer("Player 2"),
             new Request.Authorize("1678"), new Player.HumanPlayer("Player 3"),
             new Request.Authorize("1679"), new Player.HumanPlayer("Player 4"),
-            new Request.Authorize("1670"), new Player.HumanPlayer("Player 5")
+            new Request.Authorize("1670"), new Player.HumanPlayer("Player 5"),
+            new Request.Authorize("7564"), new Player.HumanPlayer("Player 6"),
+            new Request.Authorize("7890"), new Player.HumanPlayer("Player 7")
     );
 
     public Server(Game game) {
