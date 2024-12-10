@@ -142,8 +142,6 @@ public class Server {
                 stateLock.lock();
                 try {
                     state.set(new State(itemLocations, playerLocations, game.playerHealth(), game.playerGold()));
-                    logger.info("Items updated to {}", itemLocations);
-                    logger.info("Players updated to {}", playerLocations);
                     // Notify client state threads
                     stateUpdated.signalAll();
                 } finally {
