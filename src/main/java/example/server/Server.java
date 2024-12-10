@@ -165,7 +165,7 @@ public class Server {
                 }
 
                 final var request = objectMapper.readValue(line, Request.class);
-                logger.info("Received command: {}", request);
+                logger.info("Received command {} from {}", request, player);
 
                 if (Objects.requireNonNull(request) instanceof Request.Command(Direction direction)) {
                     actionsQueue.put(new Action(player, direction));
@@ -192,7 +192,6 @@ public class Server {
                     writer.write(stateJson);
                     writer.newLine();
                     writer.flush();
-                    logger.info("Sent state {}", stateJson);
                 } finally {
                     stateLock.unlock();
                 }
