@@ -171,6 +171,11 @@ public class Server {
             }
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -196,6 +201,11 @@ public class Server {
             }
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException e) {
+            }
         }
     }
 
