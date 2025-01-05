@@ -38,7 +38,7 @@ public final class DrunkenCave implements Cave {
         final var rg = ThreadLocalRandom.current();
         var row = rows() / 2;
         var column = columns() / 2;
-        var n = (rows() * columns() * 6) / 10;
+        var n = (rows() * columns() * 8) / 10;
         while (n > 0) {
             if (rock(row, column)) {
                 set(row, column, false);
@@ -76,11 +76,6 @@ public final class DrunkenCave implements Cave {
                 column = columns() - 1;
             }
         }
-    }
-
-    private void go(int n, int row, int column) {
-        int nn = n;
-
     }
 
     public boolean rock(int row, int column) {

@@ -4,6 +4,8 @@ package example.server;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.*;
@@ -12,6 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import example.domain.Request;
 import example.domain.Response;
+import example.domain.configuration.Config;
+import example.domain.configuration.PlayerConfiguration;
 import example.domain.game.Action;
 import example.domain.game.Direction;
 import example.domain.game.Player;
@@ -29,22 +33,13 @@ public class Server {
     private final Condition stateUpdated = stateLock.newCondition();
     private final Game game;
 
-    private final Map<Request.Authorize, Player.HumanPlayer> known = Map.of(
-            new Request.Authorize("2345"), new Player.HumanPlayer("Andrzej Kałuża"),
-            new Request.Authorize("1234"), new Player.HumanPlayer("Daniel Lewandowski"),
-            new Request.Authorize("4231"), new Player.HumanPlayer("Adrianna Ślusarczyk"),
-            new Request.Authorize("1345"), new Player.HumanPlayer("Anna Szpyt"),
-            new Request.Authorize("1678"), new Player.HumanPlayer("Bartek Fober"),
-            new Request.Authorize("1679"), new Player.HumanPlayer("Patryk Dziedzic"),
-            new Request.Authorize("1670"), new Player.HumanPlayer("Natalia Piękoś"),
-            new Request.Authorize("7564"), new Player.HumanPlayer("Filip Kiełbasiewicz"),
-            new Request.Authorize("7890"), new Player.HumanPlayer("Maciej Wawryniuk"),
-            new Request.Authorize("5748"), new Player.HumanPlayer("Natalia Kotrys")
-    );
+    private final Collection<PlayerConfiguration> known;
 
-    public Server(Game game) {
+    public Server(Game game, Path path) throws IOException {
+        final var config = objectMapper.readValue(Files.readAllBytes(path), Config.class);
+        this.known = config.known();
         this.game = game;
-        known.forEach((authorize, player) -> game.add(player, game::randomLocation));
+        known.forEach((configuration) -> game.add(configuration.player(), game::randomLocation));
         game.render();
     }
 
@@ -86,7 +81,11 @@ public class Server {
             final Player.HumanPlayer player;
             final var request = objectMapper.readValue(line, Request.class);
             if (Objects.requireNonNull(request) instanceof Request.Authorize authorize) {
-                player = known.get(authorize);
+                player = known.stream()
+                        .filter(configuration -> configuration.authorize().equals(authorize))
+                        .findAny()
+                        .map(PlayerConfiguration::player)
+                        .orElse(null);
                 if (player == null) {
                     final var json = objectMapper.writeValueAsString(new Response.Unauthorized());
                     writer.write(json);
